@@ -31,12 +31,20 @@ class Cbench(app_manager.RyuApp):
 
     def __init__(self, *args, **kwargs):
         super(Cbench, self).__init__(*args, **kwargs)
+        self.dpid_to_dp = {}
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
     def packet_in_handler(self, ev):
         msg = ev.msg
         datapath = msg.datapath
         ofproto = datapath.ofproto
+
+        dpid = datapath.id
+        id2dp_entry = self.dpid_to_dp.get(dpid)
+        if (id2dp_entry and
+           (id2dp_entry is not datapath)):
+            id2dp_entry.close()
+        dpid_to_dp[dpid] = datapath
 
         match = datapath.ofproto_parser.OFPMatch(
             ofproto_v1_0.OFPFW_ALL, 0, 0, 0,

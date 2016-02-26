@@ -65,7 +65,12 @@ class SimpleSwitch(app_manager.RyuApp):
         src = eth.src
 
         dpid = datapath.id
-        self.mac_to_port.setdefault(dpid, {})
+        m2p_entry = self.mac_to_port.setdefault(dpid, {})
+        m2p_datapath = m2p_entry.get('datapath')
+        if (m2p_datapath and
+           (m2p_datapath is not datapath)):
+            m2p_datapath.close()
+        m2p_entry['datapath'] = datapath
 
         self.logger.info("packet in %s %s %s %s", dpid, src, dst, msg.in_port)
 
